@@ -51,7 +51,7 @@ UNISON = 'C:/Program Files/Unison/Unison.exe'
 
 
 
-server_home='//labnas1/andy/'
+server_home='//stewart/andy/'
 server_data='//stewart/DLP/'
 
 desktop_home='C:/Documents and Settings/andy/My Documents/'
@@ -110,14 +110,14 @@ def rdiff_backup(source,target,include,ignore):
 		for each in include:
 			rdiff_include.extend(['--include', '**'+path.normpath(each)])
 		if len(ignore)>0:
-			cmd = [RDIFF_BACKUP,'-v','9'] +rdiff_include + rdiff_exclude + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP] +rdiff_include + rdiff_exclude + ['--exclude','**', path.normpath(source),path.normpath(target)]
 		else:
-			cmd = [RDIFF_BACKUP,'-v','9'] +rdiff_include + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP] +rdiff_include + ['--exclude','**', path.normpath(source),path.normpath(target)]
 	else: # we should just copy everything
 		if len(ignore)>0:
-			cmd = [RDIFF_BACKUP,'-v','9'] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
 		else:
-			cmd = [RDIFF_BACKUP,'-v','9', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP, path.normpath(source),path.normpath(target)]
 	from subprocess import Popen
 	p 	= Popen(cmd)
 	p.communicate() #wait for backup to finish
@@ -137,20 +137,29 @@ def do_backup(source,dest,path_list,ignore):
 	
 	
 print('Starting ..')
-server_home_backup=0
-desktop_home_backup=0
+server_home_backup_success=False
+desktop_home_backup_success=False
+server_data_backup_success=False
 
 #Incrementally backup home directory from server to external drive
-server_home_backup=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
 
-exit()
+#Incrementally backup home directory from desktop to desktop second location
+desktop_home_backup_success=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
 
+#Incrementally backup data directory from server to external drive
+server_data_backup_success=do_backup(server_data,external_drive_data,[],ignore)
 	
-
-
-	
-if server_home_backup and desktop_home_backup:	
+if server_home_backup_success and desktop_home_backup_success:	
 	sync(desktop_home,server_home,Home_Directories,ignore)
 else:
 	log_error('Desktop and server home directory sync not attempted.')
+	
+# Repeat to Log Changes	
+#Incrementally backup home directory from server to external drive
+server_home_backup=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+
+#Incrementally backup home directory from desktop to desktop second location
+desktop_home_backup=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
+
 	

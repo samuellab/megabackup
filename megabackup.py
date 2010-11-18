@@ -155,16 +155,19 @@ server_data_backup_success=do_backup(server_data,external_drive_data,[],ignore)
 	
 if server_home_backup_success and desktop_home_backup_success:	
 	print('Sync home directories between desktop and server')
-	sync(desktop_home,server_home,Home_Directories,ignore)
+	if sync(desktop_home,server_home,Home_Directories,ignore):
+		print('Repeat incremental backups')
+		# Repeat to Log Changes	
+		#Incrementally backup home directory from server to external drive
+		server_home_backup=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+
+		#Incrementally backup home directory from desktop to desktop second location
+		desktop_home_backup=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
+	else:
+		log_error('Sync failed!')
+		
 else:
 	log_error('Desktop and server home directory sync not attempted.')
 	
-print('Repeat incremental backups')
-# Repeat to Log Changes	
-#Incrementally backup home directory from server to external drive
-server_home_backup=do_backup(server_home,external_drive_home,Home_Directories,ignore)
-
-#Incrementally backup home directory from desktop to desktop second location
-desktop_home_backup=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
 
 	

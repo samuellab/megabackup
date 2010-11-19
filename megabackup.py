@@ -76,6 +76,10 @@ def path_exists(fpath):
 def log_error(errmsg):
 	print('MegaBackup ERROR: '+errmsg)
 	return
+
+def printlog(msg):
+	print('MegaBackup Message: '+msg)
+	return
 	
 def sync(source,dest,pathlist,ignore):
 	from os import path
@@ -96,7 +100,7 @@ def sync(source,dest,pathlist,ignore):
 
 def rdiff_backup(source,target,include,ignore):
 	from os import path
-
+	v='3'
 	rdiff_exclude=[]
 	if len(ignore)>0:
 		for each in ignore:
@@ -109,14 +113,14 @@ def rdiff_backup(source,target,include,ignore):
 		for each in include:
 			rdiff_include.extend(['--include', '**'+path.normpath(each)])
 		if len(ignore)>0:
-			cmd = [RDIFF_BACKUP] +rdiff_include + rdiff_exclude + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + rdiff_exclude + ['--exclude','**', path.normpath(source),path.normpath(target)]
 		else:
-			cmd = [RDIFF_BACKUP] +rdiff_include + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + ['--exclude','**', path.normpath(source),path.normpath(target)]
 	else: # we should just copy everything
 		if len(ignore)>0:
-			cmd = [RDIFF_BACKUP] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
 		else:
-			cmd = [RDIFF_BACKUP, path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v, path.normpath(source),path.normpath(target)]
 	from subprocess import Popen
 	p 	= Popen(cmd)
 	p.communicate() #wait for backup to finish
@@ -135,32 +139,37 @@ def do_backup(source,dest,path_list,ignore):
 	return False
 	
 	
-print('Starting ..')
+printlog('Starting ..')
+
 server_home_backup_success=False
 desktop_home_backup_success=False
 server_data_backup_success=False
 
 #Incrementally backup home directory from server to external drive
-print('Incrementally backup home directory from server to external drive')
+printlog('Incrementally backup home directory from server to external drive')
 server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
 
 
 #Incrementally backup home directory from desktop to desktop second location
-print('Incrementally backup home directory from desktop to desktop second location')
+printlog('Incrementally backup home directory from desktop to desktop second location')
 desktop_home_backup_success=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
 
 #Incrementally backup data directory from server to external drive
-print('Incrementally backup data directory from server to external drive')
+printlog('Incrementally backup data directory from server to external drive')
 server_data_backup_success=do_backup(server_data,external_drive_data,[],ignore)
 	
 if server_home_backup_success and desktop_home_backup_success:	
-	print('Sync home directories between desktop and server')
+	printlog('Sync home directories between desktop and server')
 	if sync(desktop_home,server_home,Home_Directories,ignore):
-		print('Repeat incremental backups')
-		# Repeat to Log Changes	
+		printlog('Repeat incremental backups')
+		# Repeat incremental backups of server and desktop's home directories	
+	
+		printlog('Round 2: Incrementally backup home directory from server to external drive')
 		#Incrementally backup home directory from server to external drive
 		server_home_backup=do_backup(server_home,external_drive_home,Home_Directories,ignore)
-
+		
+		
+		printlog('Round 2: Incrementally backup home directory from desktop to desktop second location')
 		#Incrementally backup home directory from desktop to desktop second location
 		desktop_home_backup=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
 	else:
@@ -168,6 +177,11 @@ if server_home_backup_success and desktop_home_backup_success:
 		
 else:
 	log_error('Desktop and server home directory sync not attempted.')
+	print('server_home_backup_success =')
+	print(server_home_backup_success)
+	print('desktop_home_backup_success =')
+	print(desktop_home_backup_success)
 	
+
 
 	

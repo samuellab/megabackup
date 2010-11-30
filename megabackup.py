@@ -62,7 +62,7 @@ external_drive_data='F:/MegaBackup/data/'
 
 # List the directories you want to backup here, leave blank to backup all directories
 Data_Directories=[]
-Home_Directories=['Posters' ,'Presentations' ,'Proposals' ,'Publication','Graphics','ConferenceLogistics']
+Home_Directories=['Posters' ,'Presentations' ,'Proposals' ,'Publication','Graphics','ConferenceLogistics' 'CV']
 
 
 #Files to Ignore

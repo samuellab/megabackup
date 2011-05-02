@@ -123,9 +123,9 @@ def rdiff_backup(source,target,include,ignore):
 			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
 		else:
 			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v, path.normpath(source),path.normpath(target)]
-	
+	from string import join
 	print("About to run:")
-	print(cmd)
+	print(join(cmd))
 	from subprocess import Popen
 	p 	= Popen(cmd)
 	p.communicate() #wait for backup to finish
@@ -152,8 +152,8 @@ desktop_home_backup_success=False
 server_data_backup_success=False
 
 #Incrementally backup home directory from server to external drive
-#printlog('Incrementally backup home directory from server to external drive')
-#server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+printlog('Incrementally backup home directory from server to external drive')
+server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
 
 
 

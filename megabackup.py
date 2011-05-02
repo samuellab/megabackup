@@ -62,7 +62,8 @@ external_drive_data='F:/MegaBackup/data/'
 
 # List the directories you want to backup here, leave blank to backup all directories
 Data_Directories=[]
-Home_Directories=['Posters' ,'Presentations' ,'Proposals' ,'Publication','Graphics','ConferenceLogistics' 'CV' 'ProjectManagement' 'Teaching' 'Refereeing']
+Home_Directories=['Posters' ,'Presentations' ,'Proposals' ,'Publication','Graphics','ConferenceLogistics' ,'CV' ,'ProjectManagement' 'Teaching' ,'Refereeing']
+
 
 
 #Files to Ignore
@@ -104,26 +105,31 @@ def rdiff_backup(source,target,include,ignore):
 	rdiff_exclude=[]
 	if len(ignore)>0:
 		for each in ignore:
-			rdiff_exclude.extend(['--exclude', '**'+path.normpath(each)])
+			rdiff_exclude.extend(['--exclude', '**'+path.normpath(each)  ])
+	
 	
 	#OK. THere are two cases. The case where we have are specifying a list of folders to include
 	# And the case where we are just copying everythiung in the subdirectory
-	if len(include)>0:
+	if len(include)>0: #if we are specifying a list
 		rdiff_include=[]
-		for each in include:
+		for each in include:  
 			rdiff_include.extend(['--include', '**'+path.normpath(each)])
 		if len(ignore)>0:
-			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + rdiff_exclude + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + rdiff_exclude + ['--exclude', '**', path.normpath(source),path.normpath(target)]
 		else:
-			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + ['--exclude','**', path.normpath(source),path.normpath(target)]
+			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] +rdiff_include + ['--exclude', '**', path.normpath(source),path.normpath(target)]
 	else: # we should just copy everything
 		if len(ignore)>0:
 			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v] + rdiff_exclude + [ path.normpath(source),path.normpath(target)]
 		else:
 			cmd = [RDIFF_BACKUP,'--terminal-verbosity',v, path.normpath(source),path.normpath(target)]
+	
+	print("About to run:")
+	print(cmd)
 	from subprocess import Popen
 	p 	= Popen(cmd)
 	p.communicate() #wait for backup to finish
+	
 	return p.returncode == 0
 	
 	
@@ -146,13 +152,16 @@ desktop_home_backup_success=False
 server_data_backup_success=False
 
 #Incrementally backup home directory from server to external drive
-printlog('Incrementally backup home directory from server to external drive')
-server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+#printlog('Incrementally backup home directory from server to external drive')
+#server_home_backup_success=do_backup(server_home,external_drive_home,Home_Directories,ignore)
+
 
 
 #Incrementally backup home directory from desktop to desktop second location
 printlog('Incrementally backup home directory from desktop to desktop second location')
 desktop_home_backup_success=do_backup(desktop_home,desktop_home_backup,Home_Directories,ignore)
+
+
 
 #Incrementally backup data directory from server to external drive
 printlog('Incrementally backup data directory from server to external drive')
